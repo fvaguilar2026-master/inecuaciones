@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 11 - Sistema de Inecuaciones Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            user-select: none;
+        }
+        .math-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Cuadrícula estilo cuaderno como en la imagen de referencia */
+        .notebook-grid {
+            background-size: 24px 24px;
+            background-image: 
+                linear-gradient(to right, rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+        }
+        .brace-left {
+            border-left: 3px solid #1e3a8a;
+            border-top-left-radius: 14px;
+            border-bottom-left-radius: 14px;
+            position: relative;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+        .glow-success {
+            animation: pulseGlow 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-3 sm:p-6">
+
+    <!-- Contenedor Principal estilo ficha de trabajo interactiva -->
+    <main class="w-full max-w-4xl bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative">
+        
+        <!-- Franja lateral naranja idéntica al diseño de la ficha -->
+        <div class="absolute left-0 top-0 bottom-0 w-2.5 sm:w-3.5 bg-orange-600"></div>
+
+        <!-- Encabezado -->
+        <header class="pl-6 sm:pl-8 pr-5 sm:pr-8 pt-5 pb-4 border-b border-orange-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-gradient-to-r from-orange-50/40 to-white">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-orange-600">EJERCICIO 11</h1>
+                    <span id="badge-step" class="px-2.5 py-0.5 text-xs font-bold rounded-full bg-orange-100 text-orange-700 border border-orange-200">
+                        Paso 1 de 4
+                    </span>
+                </div>
+                <p class="text-sm sm:text-base text-slate-700 mt-1 font-medium">
+                    Resuelve cada inecuación y grafica la intersección en la recta numérica.
+                </p>
+            </div>
+            <div class="flex items-center gap-2 self-start sm:self-center">
+                <span class="text-xs font-bold tracking-wider uppercase text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                    Desarrolla y Representa
+                </span>
+                <button id="btn-reset" title="Reiniciar ejercicio" class="p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg border border-slate-200 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Barra de progreso interactiva -->
+        <div class="pl-6 sm:pl-8 pr-5 sm:pr-8 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2 overflow-x-auto">
+            <button onclick="goToStep(1)" id="tab-1" class="step-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-orange-600 text-white shadow-sm whitespace-nowrap">
+                <span class="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">1</span>
+                Inecuación (I)
+            </button>
+            <div class="h-0.5 flex-1 bg-slate-200 min-w-[16px]"></div>
+            <button onclick="goToStep(2)" id="tab-2" class="step-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-500 border border-slate-200 whitespace-nowrap">
+                <span class="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center text-[10px]">2</span>
+                Inecuación (II)
+            </button>
+            <div class="h-0.5 flex-1 bg-slate-200 min-w-[16px]"></div>
+            <button onclick="goToStep(3)" id="tab-3" class="step-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-500 border border-slate-200 whitespace-nowrap">
+                <span class="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center text-[10px]">3</span>
+                Graficar Recta
+            </button>
+            <div class="h-0.5 flex-1 bg-slate-200 min-w-[16px]"></div>
+            <button onclick="goToStep(4)" id="tab-4" class="step-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-500 border border-slate-200 whitespace-nowrap">
+                <span class="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center text-[10px]">4</span>
+                Conjunto Solución
+            </button>
+        </div>
+
+        <!-- Zona cuadriculada de trabajo -->
+        <div class="pl-6 sm:pl-8 pr-5 sm:pr-8 py-6 notebook-grid flex-1 flex flex-col gap-6">
+            
+            <!-- Bloque del Sistema de Inecuaciones -->
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6 bg-white/90 backdrop-blur-sm p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <!-- Sistema original con llave SVG -->
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-24 text-blue-900 flex-shrink-0" viewBox="0 0 24 100" fill="none">
+                        <path d="M20 4C12 4 12 12 12 22V38C12 45 6 50 2 50C6 50 12 55 12 62V78C12 88 12 96 20 96" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="flex flex-col gap-3 math-font text-xl sm:text-2xl font-bold text-blue-950">
+                        <div id="eq1-display" class="px-3 py-1 rounded-lg transition-all bg-blue-50/80 border border-blue-200">
+                            x + 2 &gt; 5
+                        </div>
+                        <div id="eq2-display" class="px-3 py-1 rounded-lg transition-all bg-slate-50 border border-slate-200 text-slate-600">
+                            x - 1 &le; 7
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flecha de equivalencia -->
+                <div class="hidden md:flex items-center text-slate-400">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    </svg>
+                </div>
+
+                <!-- Resumen de despejes completados -->
+                <div class="flex flex-col gap-2.5 w-full md:w-auto min-w-[230px]">
+                    <div id="summary-eq1" class="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-dashed border-blue-300 bg-blue-50/40 text-sm">
+                        <span class="font-semibold text-blue-800">Despeje (I):</span>
+                        <span id="summary-eq1-val" class="math-font font-bold text-blue-600">Pendiente...</span>
+                    </div>
+                    <div id="summary-eq2" class="flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl border border-dashed border-purple-300 bg-purple-50/40 text-sm">
+                        <span class="font-semibold text-purple-800">Despeje (II):</span>
+                        <span id="summary-eq2-val" class="math-font font-bold text-purple-600">Pendiente...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Dinámico de Interacción según el Paso Actual -->
+            <div id="interactive-panel" class="bg-white rounded-2xl border-2 border-orange-200 p-4 sm:p-5 shadow-md transition-all">
+                <!-- Se rellena dinámicamente mediante JS -->
+            </div>
+
+            <!-- Sección: REPRESENTACIÓN EN LA RECTA NUMÉRICA -->
+            <div class="bg-white/95 rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col gap-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="text-xs sm:text-sm font-extrabold tracking-wide text-slate-800 uppercase flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+                        Representación en la Recta Numérica
+                    </h2>
+                    <!-- Leyenda interactiva -->
+                    <div class="flex flex-wrap items-center gap-3 text-xs font-medium">
+                        <span class="flex items-center gap-1.5 text-blue-700">
+                            <span class="w-3 h-3 rounded-full border-2 border-blue-600 bg-white inline-block"></span>
+                            x &gt; 3 (Abierto)
+                        </span>
+                        <span class="flex items-center gap-1.5 text-purple-700">
+                            <span class="w-3 h-3 rounded-full bg-purple-600 inline-block"></span>
+                            x &le; 8 (Cerrado)
+                        </span>
+                        <span class="flex items-center gap-1.5 text-emerald-700 font-bold">
+                            <span class="w-3.5 h-2 rounded bg-emerald-500 inline-block"></span>
+                            Intersección
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Contenedor responsivo del Canvas de la Recta Numérica -->
+                <div id="canvas-wrapper" class="w-full h-44 sm:h-48 relative rounded-xl bg-slate-50/70 border border-slate-200 overflow-hidden cursor-pointer">
+                    <canvas id="numberLineCanvas" class="w-full h-full block"></canvas>
+                </div>
+
+                <!-- Controles rápidos para la recta numérica (visibles en Paso 3 y 4) -->
+                <div id="graph-controls" class="hidden flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-slate-600">Herramienta activa:</span>
+                        <button id="tool-ineq1" onclick="selectGraphTool('ineq1')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all">
+                            1. Ubicar punto de (I): x &gt; 3
+                        </button>
+                        <button id="tool-ineq2" onclick="selectGraphTool('ineq2')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-100 text-purple-800 hover:bg-purple-200 transition-all">
+                            2. Ubicar punto de (II): x &le; 8
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-toggle-open1" onclick="toggleOpenClosed(1)" class="hidden px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100">
+                            Círculo (I): <span id="label-type1">Abierto ○</span>
+                        </button>
+                        <button id="btn-toggle-open2" onclick="toggleOpenClosed(2)" class="hidden px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-purple-300 bg-purple-50 text-purple-800 hover:bg-purple-100">
+                            Círculo (II): <span id="label-type2">Cerrado ●</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: CONJUNTO SOLUCIÓN -->
+            <div class="bg-white/95 rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-xs sm:text-sm font-extrabold tracking-wide text-slate-800 uppercase">
+                        CONJUNTO SOLUCIÓN:
+                    </span>
+                    <div id="solution-box" class="min-w-[180px] sm:min-w-[240px] px-4 py-2 border-b-2 border-slate-800 bg-slate-50 rounded-t-lg math-font text-base sm:text-lg font-bold text-center text-slate-400 transition-all">
+                        ?
+                    </div>
+                </div>
+                <div id="final-status" class="text-xs sm:text-sm font-semibold text-slate-500">
+                    Completa los pasos para revelar y validar la solución.
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Caja de mensajes / retroalimentación instantánea (sin alert) -->
+        <div id="toast-banner" class="mx-6 sm:mx-8 mb-5 px-4 py-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 bg-blue-50 text-blue-800 border border-blue-200 transition-all">
+            <div class="flex items-center gap-2.5">
+                <span id="toast-icon" class="text-base">💡</span>
+                <span id="toast-text">Comencemos resolviendo la primera inecuación: despeja la variable x en x + 2 &gt; 5.</span>
+            </div>
+            <button id="btn-next-step" onclick="nextStep()" class="hidden px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all whitespace-nowrap">
+                Siguiente Paso &rarr;
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        // Estado central de la simulación del Ejercicio 11
+        const state = {
+            step: 1, // 1: Inec 1, 2: Inec 2, 3: Graficar, 4: Conjunto Solución
+            ineq1Solved: false,
+            ineq2Solved: false,
+            graphPlotted1: false,
+            graphPlotted2: false,
+            point1Pos: null,      // Valor en la recta seleccionado para x > 3
+            point1Open: true,     // true = abierto (○), false = cerrado (●)
+            point2Pos: null,      // Valor en la recta seleccionado para x <= 8
+            point2Open: false,    // false = cerrado (●), true = abierto (○)
+            activeTool: 'ineq1',  // 'ineq1' o 'ineq2'
+            hoverTick: null,      // Número entero bajo el cursor en la recta
+            solutionSelected: null
+        };
+
+        // Rango de la recta numérica (de 0 a 12, cubre perfectamente 3 y 8 con margen)
+        const MIN_TICK = 0;
+        const MAX_TICK = 12;
+
+        // Referencias DOM
+        const canvas = document.getElementById('numberLineCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+
+        // Inicialización al cargar la ventana
+        window.onload = function() {
+            resizeCanvas();
+            renderStepUI();
+            drawNumberLine();
+        };
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            drawNumberLine();
+        });
+
+        // Ajustar resolución del canvas para pantallas Retina / móviles
+        function resizeCanvas() {
+            const rect = canvasWrapper.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        // Conversión entre coordenada X en píxeles y valor numérico en la recta
+        function valueToX(val, width) {
+            const padX = 42;
+            const usableW = width - padX * 2;
+            return padX + ((val - MIN_TICK) / (MAX_TICK - MIN_TICK)) * usableW;
+        }
+
+        function xToNearestTick(px, width) {
+            const padX = 42;
+            const usableW = width - padX * 2;
+            const ratio = (px - padX) / usableW;
+            const rawVal = MIN_TICK + ratio * (MAX_TICK - MIN_TICK);
+            return Math.max(MIN_TICK, Math.min(MAX_TICK, Math.round(rawVal)));
+        }
+
+        // Eventos de interacción (ratón y táctil) sobre la recta numérica
+        function getPointerTick(clientX) {
+            const rect = canvas.getBoundingClientRect();
+            const relX = clientX - rect.left;
+            return xToNearestTick(relX, rect.width);
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (state.step < 3) return;
+            state.hoverTick = getPointerTick(e.clientX);
+            drawNumberLine();
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            state.hoverTick = null;
+            drawNumberLine();
+        });
+
+        canvas.addEventListener('click', (e) => {
+            handleCanvasTap(e.clientX);
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                e.preventDefault();
+                handleCanvasTap(e.touches[0].clientX);
+            }
+        }, { passive: false });
+
+        function handleCanvasTap(clientX) {
+            if (state.step < 3) {
+                showToast('warning', 'Primero despeja ambas inecuaciones en los Pasos 1 y 2 antes de graficar en la recta.');
+                return;
+            }
+            const tick = getPointerTick(clientX);
+
+            if (state.activeTool === 'ineq1') {
+                state.point1Pos = tick;
+                state.point1Open = true; // Por defecto abierto, modificable
+                document.getElementById('btn-toggle-open1').classList.remove('hidden');
+                updateToggleLabels();
+
+                if (tick === 3) {
+                    state.graphPlotted1 = true;
+                    showToast('success', '¡Exacto! El extremo de x > 3 va en el 3 con círculo abierto (no incluye al 3). Ahora ubica x ≤ 8.');
+                    selectGraphTool('ineq2');
+                } else {
+                    state.graphPlotted1 = false;
+                    showToast('error', `Ubicaste el punto en ${tick}, pero la primera inecuación es x > 3. Haz clic sobre el número 3.`);
+                }
+            } else if (state.activeTool === 'ineq2') {
+                state.point2Pos = tick;
+                state.point2Open = false; // Por defecto cerrado
+                document.getElementById('btn-toggle-open2').classList.remove('hidden');
+                updateToggleLabels();
+
+                if (tick === 8) {
+                    state.graphPlotted2 = true;
+                    if (state.graphPlotted1 && state.point1Open && !state.point2Open) {
+                        showToast('success', '¡Excelente! Ambos intervalos están graficados y la intersección (región verde) es visible.', true);
+                    } else {
+                        showToast('info', 'Bien, ubicaste el 8 cerrado. Verifica que el punto 3 también esté correctamente ubicado.');
+                    }
+                } else {
+                    state.graphPlotted2 = false;
+                    showToast('error', `Ubicaste el punto en ${tick}, pero la segunda inecuación es x ≤ 8. Haz clic sobre el número 8.`);
+                }
+            }
+
+            checkStep3Completion();
+            drawNumberLine();
+        }
+
+        function selectGraphTool(tool) {
+            state.activeTool = tool;
+            const btn1 = document.getElementById('tool-ineq1');
+            const btn2 = document.getElementById('tool-ineq2');
+            if (tool === 'ineq1') {
+                btn1.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all';
+                btn2.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-100 text-purple-800 hover:bg-purple-200 transition-all';
+            } else {
+                btn2.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-600 text-white shadow-sm transition-all';
+                btn1.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-100 text-blue-800 hover:bg-blue-200 transition-all';
+            }
+        }
+
+        function toggleOpenClosed(which) {
+            if (which === 1) {
+                state.point1Open = !state.point1Open;
+            } else {
+                state.point2Open = !state.point2Open;
+            }
+            updateToggleLabels();
+            checkStep3Completion();
+            drawNumberLine();
+        }
+
+        function updateToggleLabels() {
+            document.getElementById('label-type1').textContent = state.point1Open ? 'Abierto ○' : 'Cerrado ●';
+            document.getElementById('label-type2').textContent = state.point2Open ? 'Abierto ○' : 'Cerrado ●';
+        }
+
+        function checkStep3Completion() {
+            const valid1 = state.point1Pos === 3 && state.point1Open === true;
+            const valid2 = state.point2Pos === 8 && state.point2Open === false;
+            state.graphPlotted1 = valid1;
+            state.graphPlotted2 = valid2;
+
+            if (valid1 && valid2) {
+                showToast('success', '¡Gráfica perfecta! Observa cómo se cruzan ambos intervalos entre 3 (abierto) y 8 (cerrado).', true);
+            } else if (state.point1Pos === 3 && !state.point1Open) {
+                showToast('warning', 'El signo ">" es estricto, así que el círculo en 3 debe ser ABIERTO (○).');
+            } else if (state.point2Pos === 8 && state.point2Open) {
+                showToast('warning', 'El signo "≤" incluye al extremo, así que el círculo en 8 debe ser CERRADO (●).');
+            }
+        }
+
+        // Dibujo completo de la Recta Numérica e Intervalos
+        function drawNumberLine() {
+            const rect = canvasWrapper.getBoundingClientRect();
+            const w = rect.width;
+            const h = rect.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const baseLineY = h - 42;
+            const level1Y = baseLineY - 34; // Altura intervalo 1 (x > 3)
+            const level2Y = baseLineY - 64; // Altura intervalo 2 (x <= 8)
+
+            // 1. Sombreado de la INTERSECCIÓN si ambos intervalos están bien graficados
+            if (state.graphPlotted1 && state.graphPlotted2) {
+                const xStart = valueToX(3, w);
+                const xEnd = valueToX(8, w);
+
+                // Zona sombreada verde
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.18)';
+                ctx.fillRect(xStart, level2Y - 12, xEnd - xStart, baseLineY - (level2Y - 12));
+
+                // Líneas punteadas verticales de proyección hacia la recta
+                ctx.save();
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(xStart, level1Y);
+                ctx.lineTo(xStart, baseLineY);
+                ctx.moveTo(xEnd, level2Y);
+                ctx.lineTo(xEnd, baseLineY);
+                ctx.stroke();
+                ctx.restore();
+
+                // Barra resaltada de intersección sobre la recta principal
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(xStart, baseLineY);
+                ctx.lineTo(xEnd, baseLineY);
+                ctx.stroke();
+
+                // Etiqueta flotante de intersección
+                ctx.fillStyle = '#047857';
+                ctx.font = 'bold 12px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Intersección: ]3 ; 8]', (xStart + xEnd) / 2, level2Y - 20);
+            }
+
+            // 2. Eje horizontal principal con flechas en ambos extremos (como en la imagen)
+            const leftArrowX = 18;
+            const rightArrowX = w - 18;
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(leftArrowX, baseLineY);
+            ctx.lineTo(rightArrowX, baseLineY);
+            ctx.stroke();
+
+            // Punta de flecha izquierda
+            ctx.fillStyle = '#475569';
+            ctx.beginPath();
+            ctx.moveTo(leftArrowX, baseLineY);
+            ctx.lineTo(leftArrowX + 8, baseLineY - 4);
+            ctx.lineTo(leftArrowX + 8, baseLineY + 4);
+            ctx.closePath();
+            ctx.fill();
+
+            // Punta de flecha derecha
+            ctx.beginPath();
+            ctx.moveTo(rightArrowX, baseLineY);
+            ctx.lineTo(rightArrowX - 8, baseLineY - 4);
+            ctx.lineTo(rightArrowX - 8, baseLineY + 4);
+            ctx.closePath();
+            ctx.fill();
+
+            // 3. Marcas (ticks) y números enteros del 0 al 12
+            for (let i = MIN_TICK; i <= MAX_TICK; i++) {
+                const tx = valueToX(i, w);
+                const isHovered = (state.step >= 3 && state.hoverTick === i);
+
+                // Resaltado hover para guiar al estudiante
+                if (isHovered) {
+                    ctx.fillStyle = 'rgba(249, 115, 22, 0.15)';
+                    ctx.beginPath();
+                    ctx.arc(tx, baseLineY, 14, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.strokeStyle = isHovered ? '#ea580c' : '#64748b';
+                ctx.lineWidth = isHovered ? 2.5 : 1.5;
+                ctx.beginPath();
+                ctx.moveTo(tx, baseLineY - 6);
+                ctx.lineTo(tx, baseLineY + 6);
+                ctx.stroke();
+
+                // Etiqueta numérica
+                ctx.fillStyle = isHovered ? '#ea580c' : '#334155';
+                ctx.font = (i === 3 || i === 8) ? 'bold 13px JetBrains Mono, monospace' : '500 12px JetBrains Mono, monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(i.toString(), tx, baseLineY + 22);
+            }
+
+            // 4. Dibujar Intervalo 1: x > 3 (hacia la derecha, color azul)
+            if (state.point1Pos !== null) {
+                const px1 = valueToX(state.point1Pos, w);
+                const endRight = rightArrowX - 10;
+
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(px1, level1Y);
+                ctx.lineTo(endRight, level1Y);
+                ctx.stroke();
+
+                // Flecha derecha del rayo
+                ctx.fillStyle = '#2563eb';
+                ctx.beginPath();
+                ctx.moveTo(endRight + 4, level1Y);
+                ctx.lineTo(endRight - 5, level1Y - 4);
+                ctx.lineTo(endRight - 5, level1Y + 4);
+                ctx.closePath();
+                ctx.fill();
+
+                // Etiqueta del rayo
+                ctx.font = 'bold 11px JetBrains Mono, monospace';
+                ctx.textAlign = 'left';
+                ctx.fillText(`x > ${state.point1Pos}`, px1 + 10, level1Y - 7);
+
+                // Círculo extremo (abierto o cerrado)
+                ctx.beginPath();
+                ctx.arc(px1, level1Y, 5.5, 0, Math.PI * 2);
+                if (state.point1Open) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#2563eb';
+                    ctx.stroke();
+                } else {
+                    ctx.fillStyle = '#2563eb';
+                    ctx.fill();
+                }
+            }
+
+            // 5. Dibujar Intervalo 2: x <= 8 (hacia la izquierda, color morado)
+            if (state.point2Pos !== null) {
+                const px2 = valueToX(state.point2Pos, w);
+                const endLeft = leftArrowX + 10;
+
+                ctx.strokeStyle = '#7c3aed';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(px2, level2Y);
+                ctx.lineTo(endLeft, level2Y);
+                ctx.stroke();
+
+                // Flecha izquierda del rayo
+                ctx.fillStyle = '#7c3aed';
+                ctx.beginPath();
+                ctx.moveTo(endLeft - 4, level2Y);
+                ctx.lineTo(endLeft + 5, level2Y - 4);
+                ctx.lineTo(endLeft + 5, level2Y + 4);
+                ctx.closePath();
+                ctx.fill();
+
+                // Etiqueta del rayo
+                ctx.font = 'bold 11px JetBrains Mono, monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText(`x ≤ ${state.point2Pos}`, px2 - 10, level2Y - 7);
+
+                // Círculo extremo (cerrado o abierto)
+                ctx.beginPath();
+                ctx.arc(px2, level2Y, 5.5, 0, Math.PI * 2);
+                if (state.point2Open) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#7c3aed';
+                    ctx.stroke();
+                } else {
+                    ctx.fillStyle = '#7c3aed';
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Navegación entre pasos
+        function goToStep(targetStep) {
+            if (targetStep === 2 && !state.ineq1Solved) {
+                showToast('warning', 'Resuelve primero la Inecuación (I) antes de pasar a la segunda.');
+                return;
+            }
+            if (targetStep === 3 && (!state.ineq1Solved || !state.ineq2Solved)) {
+                showToast('warning', 'Debes despejar ambas inecuaciones antes de graficar en la recta.');
+                return;
+            }
+            if (targetStep === 4 && (!state.graphPlotted1 || !state.graphPlotted2)) {
+                showToast('warning', 'Completa correctamente la gráfica de ambos intervalos en la recta numérica.');
+                return;
+            }
+            state.step = targetStep;
+            renderStepUI();
+            drawNumberLine();
+        }
+
+        function nextStep() {
+            if (state.step < 4) {
+                goToStep(state.step + 1);
+            }
+        }
+
+        // Renderizado dinámico de cada paso en el panel interactivo
+        function renderStepUI() {
+            const panel = document.getElementById('interactive-panel');
+            const badge = document.getElementById('badge-step');
+            const graphControls = document.getElementById('graph-controls');
+            const eq1Disp = document.getElementById('eq1-display');
+            const eq2Disp = document.getElementById('eq2-display');
+
+            badge.textContent = `Paso ${state.step} de 4`;
+
+            // Actualizar pestañas superiores
+            for (let i = 1; i <= 4; i++) {
+                const tab = document.getElementById(`tab-${i}`);
+                if (i === state.step) {
+                    tab.className = 'step-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-orange-600 text-white shadow-sm whitespace-nowrap';
+                } else if (
+                    (i === 1 && state.ineq1Solved) ||
+                    (i === 2 && state.ineq2Solved) ||
+                    (i === 3 && state.graphPlotted1 && state.graphPlotted2) ||
+                    (i === 4 && state.solutionSelected === 'correct')
+                ) {
+                    tab.className = 'step-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap';
+                } else {
+                    tab.className = 'step-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-500 border border-slate-200 whitespace-nowrap';
+                }
+            }
+
+            // Resaltar ecuación activa
+            eq1Disp.className = state.step === 1
+                ? 'px-3 py-1 rounded-lg transition-all bg-blue-100 border-2 border-blue-500 text-blue-950 shadow-sm'
+                : 'px-3 py-1 rounded-lg transition-all bg-slate-50 border border-slate-200 text-slate-700';
+
+            eq2Disp.className = state.step === 2
+                ? 'px-3 py-1 rounded-lg transition-all bg-purple-100 border-2 border-purple-500 text-purple-950 shadow-sm'
+                : 'px-3 py-1 rounded-lg transition-all bg-slate-50 border border-slate-200 text-slate-700';
+
+            graphControls.classList.toggle('hidden', state.step < 3);
+            graphControls.classList.toggle('flex', state.step >= 3);
+
+            // Contenido específico por paso
+            if (state.step === 1) {
+                panel.innerHTML = `
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+                                Paso 1: Resolver la Primera Inecuación
+                            </span>
+                            <span class="math-font text-sm font-bold text-slate-500">x + 2 &gt; 5</span>
+                        </div>
+                        <p class="text-sm text-slate-700">
+                            Para despejar <strong class="math-font text-blue-900">x</strong>, pasa el <strong class="math-font">+2</strong> al otro lado de la desigualdad restando (<strong class="math-font">5 - 2</strong>). ¿Cuál es el resultado?
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <button onclick="checkIneq1('x > 7')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-slate-800 transition-all">x &gt; 7</button>
+                            <button onclick="checkIneq1('x > 3')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-slate-800 transition-all">x &gt; 3</button>
+                            <button onclick="checkIneq1('x < 3')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-slate-800 transition-all">x &lt; 3</button>
+                            <button onclick="checkIneq1('x ≥ 3')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 font-bold text-slate-800 transition-all">x &ge; 3</button>
+                        </div>
+                    </div>
+                `;
+            } else if (state.step === 2) {
+                panel.innerHTML = `
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-purple-700 bg-purple-50 px-2.5 py-1 rounded-md border border-purple-200">
+                                Paso 2: Resolver la Segunda Inecuación
+                            </span>
+                            <span class="math-font text-sm font-bold text-slate-500">x - 1 &le; 7</span>
+                        </div>
+                        <p class="text-sm text-slate-700">
+                            Ahora despeja <strong class="math-font text-purple-900">x</strong> pasando el <strong class="math-font">-1</strong> al segundo miembro sumando (<strong class="math-font">7 + 1</strong>). Selecciona la desigualdad equivalente:
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <button onclick="checkIneq2('x ≤ 6')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-purple-500 hover:bg-purple-50 font-bold text-slate-800 transition-all">x &le; 6</button>
+                            <button onclick="checkIneq2('x < 8')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-purple-500 hover:bg-purple-50 font-bold text-slate-800 transition-all">x &lt; 8</button>
+                            <button onclick="checkIneq2('x ≥ 8')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-purple-500 hover:bg-purple-50 font-bold text-slate-800 transition-all">x &ge; 8</button>
+                            <button onclick="checkIneq2('x ≤ 8')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-purple-500 hover:bg-purple-50 font-bold text-slate-800 transition-all">x &le; 8</button>
+                        </div>
+                    </div>
+                `;
+            } else if (state.step === 3) {
+                panel.innerHTML = `
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-orange-700 bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200">
+                                Paso 3: Graficar Ambos Intervalos en la Recta
+                            </span>
+                            <span class="text-xs font-bold text-slate-500">Haz clic o toca la recta abajo</span>
+                        </div>
+                        <p class="text-sm text-slate-700">
+                            Toca sobre la recta numérica inferior para ubicar primero el extremo de <strong class="math-font text-blue-700">x &gt; 3</strong> (círculo abierto) y luego el extremo de <strong class="math-font text-purple-700">x &le; 8</strong> (círculo cerrado).
+                        </p>
+                    </div>
+                `;
+                showToast('info', 'Haz clic sobre el número 3 en la recta numérica para trazar el intervalo x > 3.');
+            } else if (state.step === 4) {
+                panel.innerHTML = `
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                                Paso 4: Determinar el Conjunto Solución (Intersección)
+                            </span>
+                            <span class="math-font text-xs font-bold text-emerald-700">3 &lt; x &le; 8</span>
+                        </div>
+                        <p class="text-sm text-slate-700">
+                            Observa la zona sombreada en verde donde coinciden ambos intervalos: empieza en <strong>3 abierto</strong> y termina en <strong>8 cerrado</strong>. ¿Cómo se escribe como intervalo?
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <button onclick="checkFinalSolution('[3 ; 8]')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 font-bold text-slate-800 transition-all">[3 ; 8]</button>
+                            <button onclick="checkFinalSolution(']3 ; 8]')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 font-bold text-slate-800 transition-all">]3 ; 8]</button>
+                            <button onclick="checkFinalSolution(']3 ; 8[')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 font-bold text-slate-800 transition-all">]3 ; 8[</button>
+                            <button onclick="checkFinalSolution('[3 ; 8[')" class="math-font py-2.5 px-3 rounded-xl border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 font-bold text-slate-800 transition-all">[3 ; 8[</button>
+                        </div>
+                    </div>
+                `;
+                showToast('info', 'Recuerda: extremo abierto usa corchete hacia afuera ] o paréntesis (, y extremo cerrado usa corchete hacia adentro ].');
+            }
+        }
+
+        // Validaciones de cada paso
+        function checkIneq1(answer) {
+            if (answer === 'x > 3') {
+                state.ineq1Solved = true;
+                document.getElementById('summary-eq1-val').textContent = 'x > 3  ✓';
+                document.getElementById('summary-eq1').classList.replace('border-dashed', 'border-solid');
+                showToast('success', '¡Correcto! x + 2 > 5  ⇒  x > 5 - 2  ⇒  x > 3.', true);
+                renderStepUI();
+            } else {
+                showToast('error', `Incorrecto (${answer}). Recuerda: +2 pasa restando al 5 (5 - 2 = 3) y el signo ">" se mantiene.`);
+            }
+        }
+
+        function checkIneq2(answer) {
+            if (answer === 'x ≤ 8') {
+                state.ineq2Solved = true;
+                document.getElementById('summary-eq2-val').textContent = 'x ≤ 8  ✓';
+                document.getElementById('summary-eq2').classList.replace('border-dashed', 'border-solid');
+                showToast('success', '¡Muy bien! x - 1 ≤ 7  ⇒  x ≤ 7 + 1  ⇒  x ≤ 8.', true);
+                renderStepUI();
+            } else {
+                showToast('error', `Incorrecto (${answer}). El -1 pasa sumando al 7 (7 + 1 = 8) y se conserva el signo "≤".`);
+            }
+        }
+
+        function checkFinalSolution(choice) {
+            const solBox = document.getElementById('solution-box');
+            const finalStatus = document.getElementById('final-status');
+
+            if (choice === ']3 ; 8]') {
+                state.solutionSelected = 'correct';
+                solBox.textContent = 'C.S. = ]3 ; 8]';
+                solBox.className = 'min-w-[180px] sm:min-w-[240px] px-4 py-2 border-b-2 border-emerald-600 bg-emerald-50 rounded-t-lg math-font text-base sm:text-lg font-extrabold text-center text-emerald-700 glow-success transition-all';
+                finalStatus.innerHTML = '<span class="text-emerald-700 font-bold">¡Ejercicio 11 completado con éxito!</span>';
+                showToast('success', '¡Felicidades! Has resuelto y graficado correctamente todo el sistema de inecuaciones.');
+                renderStepUI();
+            } else {
+                solBox.textContent = `C.S. = ${choice}`;
+                solBox.className = 'min-w-[180px] sm:min-w-[240px] px-4 py-2 border-b-2 border-rose-500 bg-rose-50 rounded-t-lg math-font text-base sm:text-lg font-bold text-center text-rose-600 transition-all';
+                showToast('error', `El intervalo ${choice} no coincide con los extremos: el 3 es abierto ( ]3 ) y el 8 es cerrado ( 8] ).`);
+            }
+        }
+
+        // Sistema de notificaciones integrado
+        function showToast(type, message, showNextBtn = false) {
+            const banner = document.getElementById('toast-banner');
+            const icon = document.getElementById('toast-icon');
+            const text = document.getElementById('toast-text');
+            const nextBtn = document.getElementById('btn-next-step');
+
+            text.textContent = message;
+            nextBtn.classList.toggle('hidden', !showNextBtn || state.step >= 4);
+
+            const styles = {
+                info: { cls: 'bg-blue-50 text-blue-800 border-blue-200', ico: '💡' },
+                success: { cls: 'bg-emerald-50 text-emerald-800 border-emerald-200', ico: '✅' },
+                warning: { cls: 'bg-amber-50 text-amber-800 border-amber-200', ico: '⚠️' },
+                error: { cls: 'bg-rose-50 text-rose-800 border-rose-200', ico: '❌' }
+            };
+
+            const s = styles[type] || styles.info;
+            banner.className = `mx-6 sm:mx-8 mb-5 px-4 py-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 border transition-all ${s.cls}`;
+            icon.textContent = s.ico;
+        }
+
+        // Reiniciar simulación completa
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            state.step = 1;
+            state.ineq1Solved = false;
+            state.ineq2Solved = false;
+            state.graphPlotted1 = false;
+            state.graphPlotted2 = false;
+            state.point1Pos = null;
+            state.point1Open = true;
+            state.point2Pos = null;
+            state.point2Open = false;
+            state.activeTool = 'ineq1';
+            state.solutionSelected = null;
+
+            document.getElementById('summary-eq1-val').textContent = 'Pendiente...';
+            document.getElementById('summary-eq2-val').textContent = 'Pendiente...';
+            document.getElementById('btn-toggle-open1').classList.add('hidden');
+            document.getElementById('btn-toggle-open2').classList.add('hidden');
+
+            const solBox = document.getElementById('solution-box');
+            solBox.textContent = '?';
+            solBox.className = 'min-w-[180px] sm:min-w-[240px] px-4 py-2 border-b-2 border-slate-800 bg-slate-50 rounded-t-lg math-font text-base sm:text-lg font-bold text-center text-slate-400 transition-all';
+            document.getElementById('final-status').textContent = 'Completa los pasos para revelar y validar la solución.';
+
+            selectGraphTool('ineq1');
+            renderStepUI();
+            drawNumberLine();
+            showToast('info', 'Simulación reiniciada. Comencemos despejando x + 2 > 5.');
+        });
+    </script>
+</body>
+</html>
